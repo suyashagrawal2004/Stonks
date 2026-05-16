@@ -1,0 +1,22 @@
+# node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Python
+backend/__pycache__/
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+*.py[cod]
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+.claude/
+.gemini/
