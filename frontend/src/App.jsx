@@ -106,7 +106,13 @@ export default function App() {
         <div className="dashboard-grid single-col">
           <div className="glass-card">
             <div className="funds-section-header">
-              <h3 className="funds-section-title">Live Mutual Funds</h3>
+              <div className="funds-title-row">
+                <h3 className="funds-section-title">Live Mutual Funds</h3>
+                <span className="live-badge">
+                  <span className="live-dot" />
+                  LIVE FEED
+                </span>
+              </div>
               <p className="text-muted">Dynamic updating rates. Talk to our AI to invest.</p>
             </div>
             <FundList funds={funds} />
