@@ -24,7 +24,7 @@ const FundList = ({ funds }) => (
         <div className="fund-details">
           <div className="detail-group">
             <span className="detail-label">NAV</span>
-            <span className="detail-value">${fund.nav}</span>
+            <span className="detail-value">₹{fund.nav}</span>
           </div>
           <div className="detail-group" style={{ alignItems: 'flex-end' }}>
             <span className="detail-label">1Y Return</span>

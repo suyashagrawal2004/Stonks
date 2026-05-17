@@ -21,7 +21,7 @@ const ChatBot = ({ portfolio, funds }) => {
       const text = input.toLowerCase();
 
       if (text.includes('value') || text.includes('portfolio')) {
-        botResponse = `Your current total portfolio value is $${portfolio?.total_value?.toLocaleString() || 'N/A'}.`;
+        botResponse = `Your current total portfolio value is ₹${portfolio?.total_value?.toLocaleString('en-IN') || 'N/A'}.`;
       } else if (text.includes('funds') || text.includes('list')) {
         botResponse = `You have ${funds?.length || 0} funds available in your overview.`;
       } else if (text.includes('hello') || text.includes('hi')) {
