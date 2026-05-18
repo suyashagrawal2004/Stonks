@@ -85,7 +85,10 @@ async def chat_with_ai(request: ChatRequest):
         return {"response": "⚠️ **Please configure your GEMINI_API_KEY** in the `backend/.env` file to use the AI assistant. Ask your developer to provide it!"}
         
     try:
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            generation_config={"max_output_tokens": 2000}
+        )
         
         system_prompt = f"""
         You are an expert AI Mutual Fund Advisor. The user has asked for assistance with investing in mutual funds.
