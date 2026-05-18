@@ -44,13 +44,24 @@ cd Stonks
 
 ### 2. Setup Backend
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/scripts/activate  # On Windows: .\venv\Scripts\activate
-pip install -r requirements.txt
-python main.py
-```
+1. Navigate to the backend folder:
+   ```bash
+   cd backend
+   ```
+2. Create a `.env` file in the `backend` folder and add your Gemini API Key:
+   ```env
+   GEMINI_API_KEY=your_actual_gemini_api_key
+   ```
+3. Set up a virtual environment and install dependencies:
+   ```bash
+   python -m venv venv
+   source venv/bin/scripts/activate  # On Windows: .\venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+4. Run the backend server:
+   ```bash
+   python main.py
+   ```
 
 ### 3. Setup Frontend
 

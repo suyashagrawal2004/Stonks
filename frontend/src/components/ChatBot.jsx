@@ -18,12 +18,12 @@ const ChatBot = ({ portfolio, funds }) => {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
+  const handleSend = async (customMessage) => {
+    const messageToSend = customMessage || input.trim();
+    if (!messageToSend || isTyping) return;
 
-    const userMessage = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    if (!customMessage) setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
     setIsTyping(true);
 
     try {
@@ -31,7 +31,7 @@ const ChatBot = ({ portfolio, funds }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userMessage,
+          message: messageToSend,
           history: messages.map(m => ({ role: m.role, content: m.content })),
           portfolio_context: portfolio || {},
           funds_context: funds || []
@@ -39,7 +39,6 @@ const ChatBot = ({ portfolio, funds }) => {
       });
 
       const data = await response.json();
-      
       setMessages(prev => [...prev, { role: 'bot', content: data.response }]);
     } catch (error) {
       console.error("Chat API Error:", error);
@@ -48,6 +47,12 @@ const ChatBot = ({ portfolio, funds }) => {
       setIsTyping(false);
     }
   };
+
+  const quickPrompts = [
+    "Which mutual fund should I invest in?",
+    "Analyze my current portfolio",
+    "What is the best fund for low risk?"
+  ];
 
   return (
     <div className="chatbot-wrapper">
@@ -75,7 +80,6 @@ const ChatBot = ({ portfolio, funds }) => {
             {messages.map((msg, i) => (
               <div key={i} className={`message-row ${msg.role}`}>
                 <div className="message-bubble">
-                  {/* Basic markdown rendering for paragraphs and bold text */}
                   {msg.content.split('\n').map((paragraph, pIdx) => {
                     if (!paragraph.trim()) return null;
                     const parts = paragraph.split(/(\*\*.*?\*\*)/g);
@@ -95,7 +99,7 @@ const ChatBot = ({ portfolio, funds }) => {
             {isTyping && (
               <div className="message-row bot">
                 <div className="message-bubble typing-indicator">
-                  <span>.</span><span>.</span><span>.</span>
+                  <span></span><span></span><span></span>
                 </div>
               </div>
             )}
@@ -103,6 +107,18 @@ const ChatBot = ({ portfolio, funds }) => {
           </div>
 
           <div className="chat-input-area">
+            <div className="quick-prompts">
+              {quickPrompts.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSend(prompt)}
+                  className="prompt-btn"
+                  disabled={isTyping}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
             <div className="input-wrapper">
               <input
                 value={input}
@@ -113,7 +129,7 @@ const ChatBot = ({ portfolio, funds }) => {
                 disabled={isTyping}
               />
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 className="send-btn"
                 aria-label="Send message"
                 disabled={!input.trim() || isTyping}

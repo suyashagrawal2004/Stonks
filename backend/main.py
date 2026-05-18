@@ -86,7 +86,7 @@ async def chat_with_ai(request: ChatRequest):
         
     try:
         model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='gemini-2.5-flash',
             generation_config={"max_output_tokens": 2000}
         )
         
