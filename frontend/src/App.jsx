@@ -112,10 +112,10 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const fundsRes = await fetch('http://localhost:8000/api/funds');
+      const fundsRes = await fetch('https://stonks-backend-qfl6.onrender.com/api/funds');
       const fundsData = await fundsRes.json();
 
-      const portRes = await fetch('http://localhost:8000/api/portfolio');
+      const portRes = await fetch('https://stonks-backend-qfl6.onrender.com/api/portfolio');
       const portData = await portRes.json();
 
       setFunds(fundsData);
