@@ -16,12 +16,14 @@ A professional, full-stack wealth management dashboard featuring real-time mutua
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework:** React 19 (Vite)
 - **Styling:** Vanilla CSS (CSS Variables, Glassmorphism)
 - **Icons:** Lucide-React + Custom Brand SVGs
 - **Deployment:** Optimized for modern browsers
 
 ### Backend
+
 - **Framework:** FastAPI (Python)
 - **Data:** Simulated real-time financial metrics with random fluctuation algorithms.
 - **Server:** Uvicorn
@@ -29,16 +31,19 @@ A professional, full-stack wealth management dashboard featuring real-time mutua
 ## 📦 Installation & Setup
 
 ### Prerequisites
+
 - Node.js (v18+)
 - Python (v3.10+)
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/suyash-agrawal-mntta/Stonks.git
 cd Stonks
 ```
 
 ### 2. Setup Backend
+
 ```bash
 cd backend
 python -m venv venv
@@ -48,6 +53,7 @@ python main.py
 ```
 
 ### 3. Setup Frontend
+
 ```bash
 cd frontend
 npm install
@@ -57,11 +63,8 @@ npm run dev
 ## 👨‍💻 Author
 
 **Suyash Agrawal**  
-*AI Product Manager & Developer*
+_AI Product Manager & Developer_
 
 - **Portfolio:** [suyash-agrawal-mntta.github.io](https://suyash-agrawal-mntta.github.io/)
 - **LinkedIn:** [linkedin.com/in/suyash-agrawal-mntta](https://www.linkedin.com/in/suyash-agrawal-mntta/)
 - **Email:** suyash.mntta@gmail.com
-
----
-*Developed for 5paisa Technical Assessment.*

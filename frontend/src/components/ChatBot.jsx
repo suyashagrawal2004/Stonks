@@ -1,35 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send } from 'lucide-react';
 
 const ChatBot = ({ portfolio, funds }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'bot', content: 'Hello! I am your Stonks Assistant. How can I help you with your portfolio today?' }
+    { role: 'bot', content: 'Hello! I am your Stonks AI Assistant. How can I help you analyze your portfolio and find the best mutual funds to invest in?' }
   ]);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
+
+    const userMessage = input.trim();
     setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsTyping(true);
 
-    // Simple bot response logic
-    setTimeout(() => {
-      let botResponse = 'I am not sure how to answer that. Try asking about your total value or funds.';
-      const text = input.toLowerCase();
+    try {
+      const response = await fetch('http://localhost:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage,
+          history: messages.map(m => ({ role: m.role, content: m.content })),
+          portfolio_context: portfolio || {},
+          funds_context: funds || []
+        })
+      });
 
-      if (text.includes('value') || text.includes('portfolio')) {
-        botResponse = `Your current total portfolio value is ₹${portfolio?.total_value?.toLocaleString('en-IN') || 'N/A'}.`;
-      } else if (text.includes('funds') || text.includes('list')) {
-        botResponse = `You have ${funds?.length || 0} funds available in your overview.`;
-      } else if (text.includes('hello') || text.includes('hi')) {
-        botResponse = 'Hello! How can I help you today?';
-      }
-
-      setMessages(prev => [...prev, { role: 'bot', content: botResponse }]);
-    }, 600);
+      const data = await response.json();
+      
+      setMessages(prev => [...prev, { role: 'bot', content: data.response }]);
+    } catch (error) {
+      console.error("Chat API Error:", error);
+      setMessages(prev => [...prev, { role: 'bot', content: 'Sorry, I am having trouble connecting to the server. Please try again later.' }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -58,10 +75,31 @@ const ChatBot = ({ portfolio, funds }) => {
             {messages.map((msg, i) => (
               <div key={i} className={`message-row ${msg.role}`}>
                 <div className="message-bubble">
-                  {msg.content}
+                  {/* Basic markdown rendering for paragraphs and bold text */}
+                  {msg.content.split('\n').map((paragraph, pIdx) => {
+                    if (!paragraph.trim()) return null;
+                    const parts = paragraph.split(/(\*\*.*?\*\*)/g);
+                    return (
+                      <p key={pIdx} style={{ marginBottom: '0.5rem' }}>
+                        {parts.map((part, index) => 
+                          part.startsWith('**') && part.endsWith('**') 
+                            ? <strong key={index}>{part.slice(2, -2)}</strong> 
+                            : part
+                        )}
+                      </p>
+                    );
+                  })}
                 </div>
               </div>
             ))}
+            {isTyping && (
+              <div className="message-row bot">
+                <div className="message-bubble typing-indicator">
+                  <span>.</span><span>.</span><span>.</span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="chat-input-area">
@@ -72,11 +110,13 @@ const ChatBot = ({ portfolio, funds }) => {
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Ask about your portfolio..."
                 className="chat-input"
+                disabled={isTyping}
               />
               <button
                 onClick={handleSend}
                 className="send-btn"
                 aria-label="Send message"
+                disabled={!input.trim() || isTyping}
               >
                 <Send size={16} />
               </button>

@@ -7,7 +7,8 @@ import {
   Code,
   ExternalLink,
   Mail,
-  Globe
+  Globe,
+  Briefcase
 } from 'lucide-react';
 import ChatBot from './components/ChatBot';
 
@@ -17,7 +18,7 @@ const FundList = ({ funds }) => (
       <div key={fund.id} className="fund-card">
         <div className="fund-header">
           <h3 className="fund-name">{fund.name}</h3>
-          <span className={`risk-badge risk-${fund.risk_level.toLowerCase()}`}>
+          <span className={`risk-badge risk-${fund.risk_level.toLowerCase().replace(' ', '-')}`}>
             {fund.risk_level}
           </span>
         </div>
@@ -35,6 +36,55 @@ const FundList = ({ funds }) => (
     ))}
   </div>
 );
+
+const PortfolioView = ({ portfolio }) => {
+  if (!portfolio) return null;
+  const isPositive = portfolio.returns_pct >= 0;
+
+  return (
+    <div className="portfolio-section">
+      <div className="portfolio-summary-card glass-card">
+        <div className="portfolio-header">
+          <div>
+            <p className="portfolio-label">Total Portfolio Value</p>
+            <h2 className="portfolio-value">₹{portfolio.total_value.toLocaleString('en-IN')}</h2>
+          </div>
+          <div className="portfolio-icon">
+            <Wallet size={24} />
+          </div>
+        </div>
+        <div className="portfolio-stats">
+          <span className={`return-badge ${isPositive ? '' : 'negative'}`}>
+            {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+            {Math.abs(portfolio.returns_pct)}%
+          </span>
+          <span className="return-text">Total Return</span>
+        </div>
+      </div>
+
+      <div className="holdings-section">
+        <h3 className="holdings-title">
+          <Briefcase size={18} className="holdings-icon" />
+          Current Holdings
+        </h3>
+        <div className="holdings-list">
+          {portfolio.holdings.map((holding, i) => (
+            <div key={i} className="holding-item">
+              <div className="holding-info">
+                <h4 className="holding-name">{holding.name}</h4>
+                <p className="holding-units">{holding.units} Units</p>
+              </div>
+              <div className="holding-values">
+                <p className="holding-invested">₹{holding.invested_amount.toLocaleString('en-IN')}</p>
+                <p className="holding-avg">Avg: ₹{holding.avg_price}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Official Brand Icons as SVGs
 const LinkedInIcon = () => (
@@ -103,19 +153,27 @@ export default function App() {
           </div>
         </header>
 
-        <div className="dashboard-grid single-col">
-          <div className="glass-card">
-            <div className="funds-section-header">
-              <div className="funds-title-row">
-                <h3 className="funds-section-title">Live Mutual Funds</h3>
-                <span className="live-badge">
-                  <span className="live-dot" />
-                  LIVE FEED
-                </span>
+        <div className="dashboard-grid two-col">
+          {/* Left Column: Portfolio */}
+          <div className="left-column">
+            <PortfolioView portfolio={portfolio} />
+          </div>
+
+          {/* Right Column: Live Feed */}
+          <div className="right-column">
+            <div className="glass-card">
+              <div className="funds-section-header">
+                <div className="funds-title-row">
+                  <h3 className="funds-section-title">Live Mutual Funds</h3>
+                  <span className="live-badge">
+                    <span className="live-dot" />
+                    LIVE FEED
+                  </span>
+                </div>
+                <p className="text-muted">Dynamic updating rates. Talk to our AI to invest.</p>
               </div>
-              <p className="text-muted">Dynamic updating rates. Talk to our AI to invest.</p>
+              <FundList funds={funds} />
             </div>
-            <FundList funds={funds} />
           </div>
         </div>
 
