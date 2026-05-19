@@ -38,7 +38,7 @@ A professional, full-stack wealth management dashboard featuring real-time mutua
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/suyash-agrawal-mntta/Stonks.git
+git clone https://github.com/suyashagrawal2004/Stonks.git
 cd Stonks
 ```
 
@@ -76,6 +76,6 @@ npm run dev
 **Suyash Agrawal**  
 _AI Product Manager & Developer_
 
-- **Portfolio:** [suyash-agrawal-mntta.github.io](https://suyash-agrawal-mntta.github.io/)
-- **LinkedIn:** [linkedin.com/in/suyash-agrawal-mntta](https://www.linkedin.com/in/suyash-agrawal-mntta/)
-- **Email:** suyash.mntta@gmail.com
+- **Portfolio:** [suyashagrawal2004.github.io](https://suyashagrawal2004.github.io/)
+- **LinkedIn:** [linkedin.com/in/suyashagrawal2004](https://www.linkedin.com/in/suyashagrawal2004/)
+- **Email:** dm.suyash.a@gmail.com

@@ -184,19 +184,19 @@ export default function App() {
             <p className="footer-title">AI PRODUCT MANAGER & DEVELOPER</p>
           </div>
           <div className="footer-right">
-            <a href="https://suyash-agrawal-mntta.github.io/" target="_blank" rel="noreferrer" className="footer-link">
+            <a href="https://suyashagrawal2004.github.io/" target="_blank" rel="noreferrer" className="footer-link">
               <span className="footer-icon-wrapper portfolio-s">S</span>
               PORTFOLIO
             </a>
-            <a href="https://github.com/suyash-agrawal-mntta" target="_blank" rel="noreferrer" className="footer-link">
+            <a href="https://github.com/suyashagrawal2004" target="_blank" rel="noreferrer" className="footer-link">
               <span className="footer-icon-wrapper"><GitHubIcon /></span>
               GITHUB
             </a>
-            <a href="https://www.linkedin.com/in/suyash-agrawal-mntta/" target="_blank" rel="noreferrer" className="footer-link">
+            <a href="https://www.linkedin.com/in/suyashagrawal2004/" target="_blank" rel="noreferrer" className="footer-link">
               <span className="footer-icon-wrapper"><LinkedInIcon /></span>
               LINKEDIN
             </a>
-            <a href="mailto:suyash.mntta@gmail.com" className="footer-link">
+            <a href="mailto:dm.suyash.a@gmail.com" className="footer-link">
               <span className="footer-icon-wrapper"><GmailIcon /></span>
               EMAIL
             </a>
