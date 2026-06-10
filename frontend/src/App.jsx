@@ -105,6 +105,10 @@ const GmailIcon = () => (
   </svg>
 );
 
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : 'https://stonks-backend-qfl6.onrender.com';
+
 export default function App() {
   const [funds, setFunds] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
@@ -112,10 +116,10 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const fundsRes = await fetch('https://stonks-backend-qfl6.onrender.com/api/funds');
+      const fundsRes = await fetch(`${API_BASE_URL}/api/funds`);
       const fundsData = await fundsRes.json();
 
-      const portRes = await fetch('https://stonks-backend-qfl6.onrender.com/api/portfolio');
+      const portRes = await fetch(`${API_BASE_URL}/api/portfolio`);
       const portData = await portRes.json();
 
       setFunds(fundsData);
@@ -204,7 +208,7 @@ export default function App() {
         </footer>
       </main>
 
-      <ChatBot portfolio={portfolio} funds={funds} />
+      <ChatBot portfolio={portfolio} funds={funds} API_BASE_URL={API_BASE_URL} onHoldingsUpdated={fetchData} />
     </div>
   );
 }

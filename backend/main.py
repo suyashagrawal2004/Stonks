@@ -46,6 +46,10 @@ class ChatRequest(BaseModel):
     portfolio_context: Dict[str, Any]
     funds_context: List[Dict[str, Any]]
 
+class InvestRequest(BaseModel):
+    fund_id: int
+    amount: float
+
 @app.get("/api/funds")
 async def get_funds():
     # Simulate dynamic price movements
@@ -78,6 +82,45 @@ async def get_portfolio():
         "holdings": PORTFOLIO_HOLDINGS
     }
 
+@app.post("/api/invest")
+async def invest_in_fund(request: InvestRequest):
+    fund = next((f for f in FUNDS_DATA if f["id"] == request.fund_id), None)
+    if not fund:
+        raise HTTPException(status_code=404, detail="Mutual Fund not found")
+    
+    if request.amount <= 0:
+        raise HTTPException(status_code=400, detail="Investment amount must be greater than zero")
+        
+    # Calculate units purchased based on current NAV
+    units = round(request.amount / fund["nav"], 4)
+    
+    # Check if we already hold this fund
+    holding = next((h for h in PORTFOLIO_HOLDINGS if h["fund_id"] == request.fund_id), None)
+    if holding:
+        # Recalculate average price and units
+        new_units = holding["units"] + units
+        new_invested = holding["invested_amount"] + request.amount
+        avg_price = round(new_invested / new_units, 2)
+        
+        holding["units"] = round(new_units, 4)
+        holding["avg_price"] = avg_price
+        holding["invested_amount"] = round(new_invested, 2)
+    else:
+        # Add new holding
+        PORTFOLIO_HOLDINGS.append({
+            "fund_id": fund["id"],
+            "name": fund["name"],
+            "units": units,
+            "avg_price": fund["nav"],
+            "invested_amount": request.amount
+        })
+        
+    return {
+        "status": "success",
+        "message": f"Successfully invested ₹{request.amount:,.2f} in {fund['name']}.",
+        "added_units": units
+    }
+
 @app.post("/api/chat")
 async def chat_with_ai(request: ChatRequest):
     api_key = os.getenv("GEMINI_API_KEY")
@@ -86,7 +129,7 @@ async def chat_with_ai(request: ChatRequest):
         
     try:
         model = genai.GenerativeModel(
-            model_name='gemini-2.5-flash',
+            model_name='gemini-flash-latest',
             generation_config={"max_output_tokens": 2000}
         )
         
@@ -98,6 +141,8 @@ async def chat_with_ai(request: ChatRequest):
         Analyze their portfolio. They want to know which mutual funds they should invest in from the available list and why.
         Provide personalized, logical, and professional advice in a conversational tone. Keep it concise but insightful. Format with markdown if necessary.
         Use INR (₹) for currency formatting.
+        
+        CRITICAL RULE: If you recommend or suggest investing in one or more specific mutual funds from the available list, you MUST append a tag in the exact format: [INVEST_OPTION: fund_id, fund_name] at the very end of your message for each recommended fund (e.g. [INVEST_OPTION: 1, Parag Parikh Flexi Cap Fund]). Do not mention this tag in the conversation; just output it.
         """
         
         # Build history format for Gemini
@@ -119,4 +164,4 @@ async def chat_with_ai(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

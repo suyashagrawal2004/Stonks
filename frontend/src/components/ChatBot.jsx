@@ -1,7 +1,76 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send } from 'lucide-react';
 
-const ChatBot = ({ portfolio, funds }) => {
+const InvestActionCard = ({ fundId, fundName, API_BASE_URL, onHoldingsUpdated, onSuccess }) => {
+  const [amount, setAmount] = useState('5000');
+  const [isInvesting, setIsInvesting] = useState(false);
+  const [invested, setInvested] = useState(false);
+
+  const handleInvest = async () => {
+    if (isInvesting || invested) return;
+    setIsInvesting(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/invest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fund_id: fundId, amount: parseFloat(amount) })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setInvested(true);
+        if (onHoldingsUpdated) onHoldingsUpdated();
+        if (onSuccess) {
+          onSuccess(`🎉 **Transaction Confirmed!** Successfully invested **₹${parseFloat(amount).toLocaleString('en-IN')}** in **${fundName}**.`);
+        }
+      } else {
+        alert(data.detail || "Investment failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Investment error:", err);
+      alert("Unable to complete investment. Server error.");
+    } finally {
+      setIsInvesting(false);
+    }
+  };
+
+  return (
+    <div className="invest-card">
+      <div className="invest-card-header">
+        <span className="invest-card-title">💡 One-Click Investment</span>
+        <span className="invest-fund-name">{fundName}</span>
+      </div>
+      {invested ? (
+        <div className="invest-success-badge">
+          ✓ Invested Successfully
+        </div>
+      ) : (
+        <div className="invest-action-row">
+          <div className="invest-input-container">
+            <span className="currency-prefix">₹</span>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="invest-amount-input"
+              disabled={isInvesting}
+              min="500"
+              step="500"
+            />
+          </div>
+          <button
+            onClick={handleInvest}
+            className="invest-confirm-btn"
+            disabled={isInvesting || !amount || parseFloat(amount) <= 0}
+          >
+            {isInvesting ? 'Processing...' : 'Invest Now'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ChatBot = ({ portfolio, funds, API_BASE_URL, onHoldingsUpdated }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'bot', content: 'Hello! I am your Stonks AI Assistant. How can I help you analyze your portfolio and find the best mutual funds to invest in?' }
@@ -18,6 +87,22 @@ const ChatBot = ({ portfolio, funds }) => {
     scrollToBottom();
   }, [messages, isTyping]);
 
+  const parseInvestOptions = (text) => {
+    const regex = /\[INVEST_OPTION:\s*(\d+),\s*([^\]]+)\]/g;
+    const options = [];
+    let match;
+    
+    while ((match = regex.exec(text)) !== null) {
+      options.push({
+        id: parseInt(match[1], 10),
+        name: match[2].trim()
+      });
+    }
+    
+    const cleanText = text.replace(/\[INVEST_OPTION:\s*\d+,\s*[^\]]+\]/g, '').trim();
+    return { cleanText, options };
+  };
+
   const handleSend = async (customMessage) => {
     const messageToSend = customMessage || input.trim();
     if (!messageToSend || isTyping) return;
@@ -27,7 +112,7 @@ const ChatBot = ({ portfolio, funds }) => {
     setIsTyping(true);
 
     try {
-      const response = await fetch('https://stonks-backend-qfl6.onrender.com/api/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -39,7 +124,13 @@ const ChatBot = ({ portfolio, funds }) => {
       });
 
       const data = await response.json();
-      setMessages(prev => [...prev, { role: 'bot', content: data.response }]);
+      const { cleanText, options } = parseInvestOptions(data.response);
+      
+      setMessages(prev => [...prev, { 
+        role: 'bot', 
+        content: cleanText,
+        investOptions: options
+      }]);
     } catch (error) {
       console.error("Chat API Error:", error);
       setMessages(prev => [...prev, { role: 'bot', content: 'Sorry, I am having trouble connecting to the server. Please try again later.' }]);
@@ -93,6 +184,23 @@ const ChatBot = ({ portfolio, funds }) => {
                       </p>
                     );
                   })}
+                  
+                  {msg.investOptions && msg.investOptions.length > 0 && (
+                    <div className="invest-options-container">
+                      {msg.investOptions.map((opt) => (
+                        <InvestActionCard 
+                          key={opt.id} 
+                          fundId={opt.id} 
+                          fundName={opt.name} 
+                          API_BASE_URL={API_BASE_URL}
+                          onHoldingsUpdated={onHoldingsUpdated}
+                          onSuccess={(successMsg) => {
+                            setMessages(prev => [...prev, { role: 'bot', content: successMsg }]);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

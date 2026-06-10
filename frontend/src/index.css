@@ -829,3 +829,117 @@ body {
     box-shadow: 0 0 8px var(--accent-color);
   }
 }
+
+.invest-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 170, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 0 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  backdrop-filter: blur(8px);
+}
+
+.invest-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.invest-card-title {
+  font-size: 0.7rem;
+  color: var(--accent-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.invest-fund-name {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  font-weight: 600;
+  margin-top: 2px;
+  text-align: left;
+}
+
+.invest-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.invest-input-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.currency-prefix {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.invest-amount-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 8px 6px 22px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.invest-amount-input:focus {
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.invest-confirm-btn {
+  background: var(--accent-color);
+  color: #0d1117;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.invest-confirm-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 255, 170, 0.3);
+}
+
+.invest-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.invest-success-badge {
+  background: rgba(0, 255, 170, 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.invest-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
