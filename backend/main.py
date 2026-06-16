@@ -65,21 +65,111 @@ async def get_funds():
 
 @app.get("/api/portfolio")
 async def get_portfolio():
-    # Dynamically calculate the current value based on current NAVs
+    # Dynamically calculate current values and category mapping
+    holdings_details = []
     current_value = 0
+    total_invested = 0
+    
+    # Map category and risk level to each holding
     for holding in PORTFOLIO_HOLDINGS:
         fund = next((f for f in FUNDS_DATA if f["id"] == holding["fund_id"]), None)
         if fund:
-            current_value += holding["units"] * fund["nav"]
-    
-    total_invested = sum([h["invested_amount"] for h in PORTFOLIO_HOLDINGS])
+            curr_val = round(holding["units"] * fund["nav"], 2)
+            current_value += curr_val
+            total_invested += holding["invested_amount"]
+            
+            holdings_details.append({
+                **holding,
+                "current_value": curr_val,
+                "category": fund["category"],
+                "risk_level": fund["risk_level"]
+            })
+            
+    if not total_invested:
+        return {
+            "total_value": 0,
+            "total_invested": 0,
+            "returns_pct": 0,
+            "holdings": [],
+            "health_score": 100,
+            "category_breakdown": [],
+            "health_advice": "Your portfolio is empty. Start investing to build your health score!"
+        }
+        
     returns_pct = round(((current_value - total_invested) / total_invested) * 100, 2)
-
+    
+    # Calculate category & risk weights
+    category_weights = {}
+    risk_weights = {}
+    
+    for h in holdings_details:
+        weight = h["current_value"] / current_value
+        category_weights[h["category"]] = category_weights.get(h["category"], 0.0) + weight
+        risk_weights[h["risk_level"]] = risk_weights.get(h["risk_level"], 0.0) + weight
+        
+    # Calculate health score starting at 100
+    health_score = 100
+    deductions = []
+    
+    # 1. Single Fund Concentration (Penalty if single fund > 50% weight)
+    for h in holdings_details:
+        weight = h["current_value"] / current_value
+        if weight > 0.50:
+            penalty = 15
+            health_score -= penalty
+            deductions.append(f"High concentration in a single fund ({h['name']}: {round(weight*100)}%). Consider diversifying to reduce risk.")
+            break # only deduct once
+            
+    # 2. Asset Category Concentration (Penalty if single category > 60%, except Hybrid/Flexi Cap)
+    for cat, weight in category_weights.items():
+        if cat not in ["Flexi Cap", "Hybrid"] and weight > 0.60:
+            penalty = 15
+            health_score -= penalty
+            deductions.append(f"Overexposure to {cat} category ({round(weight*100)}%). Rebalance into other categories.")
+            
+    # 3. High Risk Exposure (Penalty if Very High Risk or Small Cap > 40%)
+    high_risk_weight = 0.0
+    for h in holdings_details:
+        if h["risk_level"] == "Very High" or h["category"] == "Small Cap":
+            high_risk_weight += h["current_value"] / current_value
+            
+    if high_risk_weight > 0.40:
+        penalty = 15
+        health_score -= penalty
+        deductions.append(f"Highly volatile exposure ({round(high_risk_weight*100)}% in Small Cap / Very High Risk funds). Consider balancing with debt or liquid funds.")
+        
+    # 4. Low Diversification (Penalty if < 3 funds)
+    if len(holdings_details) < 3:
+        penalty = 10
+        health_score -= penalty
+        deductions.append("Portfolio has fewer than 3 funds. Greater diversification helps lower market volatility.")
+        
+    # Ensure score bounds
+    health_score = max(0, min(100, health_score))
+    
+    # Generate advice
+    if not deductions:
+        health_advice = "Your portfolio is excellent! Asset allocation is well-diversified and balanced across risk profiles."
+    else:
+        health_advice = " ".join(deductions[:2]) # return top 2 actionable advices
+        
+    # Format category breakdown for frontend
+    category_breakdown = [
+        {"category": cat, "percentage": round(weight * 100, 1)}
+        for cat, weight in category_weights.items()
+    ]
+    
+    # Sort breakdown by percentage descending
+    category_breakdown.sort(key=lambda x: x["percentage"], reverse=True)
+    
     return {
         "total_value": round(current_value, 2),
         "total_invested": round(total_invested, 2),
         "returns_pct": returns_pct,
-        "holdings": PORTFOLIO_HOLDINGS
+        "holdings": holdings_details,
+        "health_score": health_score,
+        "category_breakdown": category_breakdown,
+        "health_advice": health_advice
     }
 
 @app.post("/api/invest")

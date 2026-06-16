@@ -37,12 +37,25 @@ const FundList = ({ funds }) => (
   </div>
 );
 
+const getScoreSeverity = (score) => {
+  if (score >= 80) return 'good';
+  if (score >= 55) return 'warning';
+  return 'critical';
+};
+
 const PortfolioView = ({ portfolio }) => {
   if (!portfolio) return null;
   const isPositive = portfolio.returns_pct >= 0;
 
+  const radius = 30;
+  const circumference = 2 * Math.PI * radius;
+  const score = portfolio.health_score ?? 100;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+  const severity = getScoreSeverity(score);
+
   return (
     <div className="portfolio-section">
+      {/* Portfolio Summary Card */}
       <div className="portfolio-summary-card glass-card">
         <div className="portfolio-header">
           <div>
@@ -62,6 +75,71 @@ const PortfolioView = ({ portfolio }) => {
         </div>
       </div>
 
+      {/* AI Portfolio Health Card */}
+      <div className="portfolio-health-card glass-card">
+        <div className="health-card-header">
+          <h3 className="health-card-title">Portfolio Health & Risk</h3>
+          <span className={`health-status-badge status-${severity}`}>
+            {severity === 'good' ? 'Healthy' : severity === 'warning' ? 'Moderate Risk' : 'High Risk'}
+          </span>
+        </div>
+        
+        <div className="health-gauge-row">
+          <div className="health-gauge-container">
+            <svg className="health-gauge" width="80" height="80">
+              <circle className="gauge-bg" cx="40" cy="40" r="30" />
+              <circle 
+                className={`gauge-fill score-${severity}`} 
+                cx="40" cy="40" r="30"
+                style={{
+                  strokeDasharray: circumference,
+                  strokeDashoffset: strokeDashoffset
+                }}
+              />
+            </svg>
+            <div className="health-score-val">
+              <span className="score-num">{score}</span>
+              <span className="score-pct">pts</span>
+            </div>
+          </div>
+          <div className="health-intro-text">
+            <p className="health-bold-status">Diversification Score: {score}/100</p>
+            <p className="health-sub-status">Weighted allocation risk score.</p>
+          </div>
+        </div>
+
+        {portfolio.category_breakdown && portfolio.category_breakdown.length > 0 && (
+          <div className="category-breakdown-section">
+            <h4 className="breakdown-title">Category Breakdown</h4>
+            <div className="breakdown-list">
+              {portfolio.category_breakdown.map((cat, i) => (
+                <div key={i} className="category-item">
+                  <div className="category-label-row">
+                    <span className="category-name">{cat.category}</span>
+                    <span className="category-pct">{cat.percentage}%</span>
+                  </div>
+                  <div className="category-progress-bar">
+                    <div 
+                      className={`category-progress-fill cat-${cat.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+                      style={{ width: `${cat.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={`advice-callout severity-${severity}`}>
+          <div className="advice-header">
+            <span className="advice-icon">💡</span>
+            <span className="advice-title">AI Rebalancing Advice</span>
+          </div>
+          <p className="advice-text">{portfolio.health_advice}</p>
+        </div>
+      </div>
+
+      {/* Holdings Section */}
       <div className="holdings-section">
         <h3 className="holdings-title">
           <Briefcase size={18} className="holdings-icon" />
