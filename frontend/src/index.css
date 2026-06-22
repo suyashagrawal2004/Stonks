@@ -1236,3 +1236,134 @@ body {
   margin: 0;
   text-align: left;
 }
+
+/* Compliance & Risk Profiler UI */
+.compliance-profiler-section {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px dashed var(--border-color);
+  margin-top: -4px;
+}
+
+.compliance-warning-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.warning-text {
+  font-size: 0.75rem;
+  color: #ffaa00;
+  font-weight: 500;
+  animation: pulse-warn 2s infinite alternate;
+}
+
+@keyframes pulse-warn {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+.start-profiler-btn {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 170, 0, 0.2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.start-profiler-btn:hover {
+  background: #ffaa00;
+  color: #0d1117;
+  box-shadow: 0 0 8px rgba(255, 170, 0, 0.3);
+}
+
+.risk-profile-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.compliance-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.risk-profile-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.risk-profile-badge.profile-conservative {
+  background: rgba(0, 210, 255, 0.1);
+  color: #00d2ff;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+}
+
+.risk-profile-badge.profile-moderate {
+  background: rgba(155, 81, 224, 0.1);
+  color: #9b51e0;
+  border: 1px solid rgba(155, 81, 224, 0.2);
+}
+
+.risk-profile-badge.profile-aggressive {
+  background: rgba(255, 60, 60, 0.1);
+  color: #ff3c3c;
+  border: 1px solid rgba(255, 60, 60, 0.2);
+}
+
+.risk-retest-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-left: auto;
+  text-decoration: underline;
+  padding: 2px 4px;
+  transition: color 0.3s ease;
+}
+
+.risk-retest-btn:hover {
+  color: var(--text-color);
+}
+
+/* Chat Survey Option Buttons */
+.survey-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.survey-option-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.survey-option-btn:hover {
+  background: rgba(0, 255, 170, 0.05);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  transform: translateX(2px);
+}

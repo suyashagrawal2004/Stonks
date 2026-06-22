@@ -24,6 +24,8 @@ api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
 
+USER_RISK_PROFILE = None
+
 # Mock Data for Indian Mutual Funds (in INR)
 FUNDS_DATA = [
     {"id": 1, "name": "Parag Parikh Flexi Cap Fund", "nav": 82.45, "1Y_return": 24.5, "risk_level": "High", "category": "Flexi Cap"},
@@ -49,6 +51,9 @@ class ChatRequest(BaseModel):
 class InvestRequest(BaseModel):
     fund_id: int
     amount: float
+
+class RiskProfileRequest(BaseModel):
+    answers: List[int]
 
 @app.get("/api/funds")
 async def get_funds():
@@ -169,7 +174,37 @@ async def get_portfolio():
         "holdings": holdings_details,
         "health_score": health_score,
         "category_breakdown": category_breakdown,
-        "health_advice": health_advice
+        "health_advice": health_advice,
+        "risk_profile": USER_RISK_PROFILE
+    }
+
+@app.post("/api/risk-profile")
+async def set_risk_profile(request: RiskProfileRequest):
+    global USER_RISK_PROFILE
+    if len(request.answers) != 3:
+        raise HTTPException(status_code=400, detail="Must provide exactly 3 answers")
+    
+    total_score = sum(request.answers)
+    
+    if total_score <= 4:
+        profile = "Conservative"
+        description = "You prioritize capital preservation and stable, low-volatility returns."
+    elif total_score <= 7:
+        profile = "Moderate"
+        description = "You seek balanced growth with moderate fluctuations."
+    else:
+        profile = "Aggressive"
+        description = "You target high growth and can tolerate significant market volatility."
+        
+    USER_RISK_PROFILE = {
+        "profile": profile,
+        "description": description,
+        "score": total_score
+    }
+    
+    return {
+        "status": "success",
+        "risk_profile": USER_RISK_PROFILE
     }
 
 @app.post("/api/invest")
@@ -227,10 +262,17 @@ async def chat_with_ai(request: ChatRequest):
         You are an expert AI Mutual Fund Advisor. The user has asked for assistance with investing in mutual funds.
         Here is the user's current portfolio: {request.portfolio_context}
         Here are the live updating mutual funds available to invest in: {request.funds_context}
+        User's Risk Profile: {USER_RISK_PROFILE if USER_RISK_PROFILE else "Unrated. (Gently recommend they take the Risk Profiler Questionnaire to get compliant recommendations)"}
         
         Analyze their portfolio. They want to know which mutual funds they should invest in from the available list and why.
         Provide personalized, logical, and professional advice in a conversational tone. Keep it concise but insightful. Format with markdown if necessary.
         Use INR (₹) for currency formatting.
+        
+        SEBI COMPLIANCE RULE: 
+        1. If the User's Risk Profile is "Conservative", you MUST advise them to avoid "High" or "Very High" risk level funds (like Nippon India Small Cap or ICICI Prudential Technology Fund). If they query or try to invest in these, warn them that it conflicts with their Conservative profile and recommend "Low" or "Medium" risk funds instead (such as Axis Liquid Fund or HDFC Balanced Advantage Fund).
+        2. If the User's Risk Profile is "Aggressive", you can recommend higher risk equity funds, but suggest keeping a portion in liquid funds for hedging.
+        3. If the User's Risk Profile is "Moderate", favor Large Cap, Hybrid, or Flexi Cap funds.
+        4. If the User's Risk Profile is "Unrated", encourage them to complete their risk profiling questionnaire in the chat to receive compliant advice.
         
         CRITICAL RULE: If you recommend or suggest investing in one or more specific mutual funds from the available list, you MUST append a tag in the exact format: [INVEST_OPTION: fund_id, fund_name] at the very end of your message for each recommended fund (e.g. [INVEST_OPTION: 1, Parag Parikh Flexi Cap Fund]). Do not mention this tag in the conversation; just output it.
         """

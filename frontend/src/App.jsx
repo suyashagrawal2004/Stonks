@@ -43,7 +43,7 @@ const getScoreSeverity = (score) => {
   return 'critical';
 };
 
-const PortfolioView = ({ portfolio }) => {
+const PortfolioView = ({ portfolio, onStartProfiler }) => {
   if (!portfolio) return null;
   const isPositive = portfolio.returns_pct >= 0;
 
@@ -82,6 +82,28 @@ const PortfolioView = ({ portfolio }) => {
           <span className={`health-status-badge status-${severity}`}>
             {severity === 'good' ? 'Healthy' : severity === 'warning' ? 'Moderate Risk' : 'High Risk'}
           </span>
+        </div>
+
+        {/* Compliance Risk Profiler Section */}
+        <div className="compliance-profiler-section">
+          {portfolio.risk_profile ? (
+            <div className="risk-profile-status-bar">
+              <span className="compliance-label">🛡️ Risk Profile:</span>
+              <span className={`risk-profile-badge profile-${portfolio.risk_profile.profile.toLowerCase()}`}>
+                {portfolio.risk_profile.profile}
+              </span>
+              <button onClick={onStartProfiler} className="risk-retest-btn" title="Retake risk profiler survey">
+                Retake
+              </button>
+            </div>
+          ) : (
+            <div className="compliance-warning-bar">
+              <span className="warning-text">⚠️ Risk Profile: UNRATED (SEBI Rule)</span>
+              <button onClick={onStartProfiler} className="start-profiler-btn">
+                Analyze Risk
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="health-gauge-row">
@@ -191,6 +213,7 @@ export default function App() {
   const [funds, setFunds] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [triggerProfiler, setTriggerProfiler] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -238,7 +261,7 @@ export default function App() {
         <div className="dashboard-grid two-col">
           {/* Left Column: Portfolio */}
           <div className="left-column">
-            <PortfolioView portfolio={portfolio} />
+            <PortfolioView portfolio={portfolio} onStartProfiler={() => setTriggerProfiler(true)} />
           </div>
 
           {/* Right Column: Live Feed */}
@@ -286,7 +309,14 @@ export default function App() {
         </footer>
       </main>
 
-      <ChatBot portfolio={portfolio} funds={funds} API_BASE_URL={API_BASE_URL} onHoldingsUpdated={fetchData} />
+      <ChatBot 
+        portfolio={portfolio} 
+        funds={funds} 
+        API_BASE_URL={API_BASE_URL} 
+        onHoldingsUpdated={fetchData} 
+        triggerProfiler={triggerProfiler}
+        setTriggerProfiler={setTriggerProfiler}
+      />
     </div>
   );
 }
